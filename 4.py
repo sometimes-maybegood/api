@@ -2,10 +2,9 @@ import sys
 
 import requests
 from PyQt6 import uic
+from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPixmap, QImage
 from PyQt6.QtWidgets import QApplication, QLabel, QMainWindow
-from PyQt6.uic.Compiler.qtproxies import QtCore
-from PyQt6.QtCore import Qt
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
@@ -22,12 +21,13 @@ class MainWindow(QMainWindow):
         self.map_zoom = 17
         self.map_ll = [30.302580, 59.991670]
         self.map_key = ''
+        self.map_theme = 'map'
 
         self.refresh_map()
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key.Key_PageUp:
-            if self.map_zoom > 0 :
+            if self.map_zoom > 0:
                 self.map_zoom -= 1
             self.refresh_map()
         if event.key() == Qt.Key.Key_PageDown:
@@ -35,24 +35,32 @@ class MainWindow(QMainWindow):
                 self.map_zoom += 1
             self.refresh_map()
         if event.key() == Qt.Key.Key_Left:
-            self.map_ll[0] -= 0.001
+            self.map_ll[0] -= 0.005
             self.refresh_map()
         if event.key() == Qt.Key.Key_Right:
-            self.map_ll[0] += 0.001
+            self.map_ll[0] += 0.005
             self.refresh_map()
         if event.key() == Qt.Key.Key_Up:
-            self.map_ll[-1] += 0.001
+            self.map_ll[-1] += 0.005
             self.refresh_map()
         if event.key() == Qt.Key.Key_Down:
-            self.map_ll[-1] -= 0.001
+            self.map_ll[-1] -= 0.005
             self.refresh_map()
         if event.key() == Qt.Key.Key_Space:
-            app.setStyle('fusion')
+            self.toggle_theme()
+
+    def toggle_theme(self):
+        if self.map_theme == 'map':
+            self.map_theme = 'dark'
+        else:
+            self.map_theme = 'map'
+        self.refresh_map()
 
     def refresh_map(self):
         mar_params = {
             "ll": ','.join(map(str, self.map_ll)),
             'z': self.map_zoom,
+            'l': self.map_theme,
             'apikey': API_KEY
         }
         session = requests.Session()
